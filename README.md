@@ -13,4 +13,4 @@ Client authentication is performed via [mosquitto-auth-plug](https://github.com/
 
 Licence for the plugin here: [mosquitto-auth-plug LICENCE](https://github.com/jpmens/mosquitto-auth-plug/blob/master/LICENSE.txt)
 
-For build environment and instruction, [here]().
+For build environment and instruction, [here](https://github.com/iottly/iottly-mqtt-broker/tree/mqtt/mosquitto-auth-plug).
