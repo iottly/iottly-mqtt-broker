@@ -1,6 +1,6 @@
 # mosquitto-auth-plug build environment
 
-- keep libmongoc version to 1.3.1 for plugin compatibilty
+- keep libmongoc version to 1.3.1 for plugin compatibility
 - openssl version compatibility is enforced by [cache.h](https://github.com/iottly/iottly-mqtt-broker/blob/mqtt/mosquitto-auth-plug/cache.h) `#ifdef`
 - make options are provided via `config.mk`
 
