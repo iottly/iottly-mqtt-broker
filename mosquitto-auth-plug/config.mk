@@ -10,7 +10,7 @@ BACKEND_JWT ?= no
 BACKEND_MONGO ?= yes
 
 # Specify the path to the Mosquitto sources here
-MOSQUITTO_SRC =/build/mosquitto-1.4.8
+MOSQUITTO_SRC =/tmp/mosquitto-1.4.8
 
 # Specify the path the OpenSSL here
 OPENSSLDIR = /usr
