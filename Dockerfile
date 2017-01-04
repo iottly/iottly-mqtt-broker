@@ -63,11 +63,13 @@ RUN  \
 
 ADD mosquitto-auth-plug/config.mk /tmp/$AUTHPLUG_FILENAME/config.mk
 ADD mosquitto-auth-plug/cache.h /tmp/$AUTHPLUG_FILENAME/cache.h
+ADD mosquitto-auth-plug/be-mongo.c /tmp/$AUTHPLUG_FILENAME/be-mongo.c
 
 RUN \
   cd /tmp/${AUTHPLUG_FILENAME} \
     && make \
-    && cp auth-plug.so /etc/mosquitto
+    && cp auth-plug.so /etc/mosquitto \
+    && cp np /etc/mosquitto
 
 
 # Removing build dependencies, clean temporary files
