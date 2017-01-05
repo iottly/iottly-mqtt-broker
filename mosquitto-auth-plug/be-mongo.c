@@ -125,8 +125,6 @@ void *be_mongo_init()
 
 char *be_mongo_getuser(void *handle, const char *username, const char *password, int *authenticated)
 {
-   fprintf (stdout, "entering be_mongo_getuser.\n");
-   fprintf (stdout, "getting user %s.\n", (username) ? username : "<nil>");
 
    struct mongo_backend *conf = (struct mongo_backend *)handle;
    mongoc_collection_t *collection;
@@ -174,8 +172,6 @@ char *be_mongo_getuser(void *handle, const char *username, const char *password,
    bson_destroy (&query);
    mongoc_cursor_destroy (cursor);
    mongoc_collection_destroy (collection);
-
-   fprintf (stdout, "get user produced %s.\n", (result) ? result : "<nil>");
 
    return result;
 }
@@ -225,16 +221,14 @@ int be_mongo_superuser(void *conf, const char *username)
 									NULL,
 									NULL);
 
-	while (!mongoc_cursor_error (cursor, &error) &&
-			mongoc_cursor_more (cursor)) {
-		if (mongoc_cursor_next (cursor, &doc)) {
-				bson_iter_init(&iter, doc);
-				bson_iter_find(&iter, handle->superuser_loc);
+    if (!mongoc_cursor_error (cursor, &error) && 
+        mongoc_cursor_next (cursor, &doc)) {
+            bson_iter_init(&iter, doc);
+            bson_iter_find(&iter, handle->superuser_loc);
 
-				result = (int64_t) bson_iter_as_int64(&iter);
+            result = (int64_t) bson_iter_as_int64(&iter);
 
-		}
-	}
+    }
 
 	if (mongoc_cursor_error (cursor, &error)) {
       	fprintf (stderr, "Cursor Failure: %s\n", error.message);
@@ -256,8 +250,8 @@ int be_mongo_aclcheck(void *conf, const char *clientid, const char *username, co
 	const bson_t *doc;
 	bson_iter_t iter;
 
-	bool check = false;
-	int match = 0;
+	bool check = false, foundflag = false;
+	int match = 0, topId = 0; 
 
 	bson_t query;
 
@@ -281,23 +275,33 @@ int be_mongo_aclcheck(void *conf, const char *clientid, const char *username, co
             bson_iter_init(&iter, doc);
             bson_iter_find(&iter, handle->topic_loc);
 
-            int64_t topId = (int64_t) bson_iter_as_int64(&iter);//, NULL);
+            topId = (int64_t) bson_iter_as_int64(&iter);//, NULL);
+            foundflag = true;
+    }
+	
+	if ( (mongoc_cursor_error (cursor, &error)) && (match != 1) ) {
+			fprintf (stderr, "Cursor Failure: %s\n", error.message);
+	}
+	
+	bson_destroy(&query);
+	mongoc_cursor_destroy (cursor);
+	mongoc_collection_destroy(collection);
 
-            bson_destroy(&query);
-            mongoc_cursor_destroy(cursor);
-            mongoc_collection_destroy(collection);
 
-            bson_init(&query);
-            bson_append_int64(&query, handle->topicId_loc, -1, topId);
-            collection = mongoc_client_get_collection(handle->client, handle->database, handle->topics_coll);
-            cursor = mongoc_collection_find(collection,
-                                            MONGOC_QUERY_NONE,
-                                            0,
-                                            0,
-                                            0,
-                                            &query,
-                                            NULL,
-                                            NULL);
+
+    if (foundflag) {
+        bson_init(&query);
+        bson_append_int64(&query, handle->topicId_loc, -1, topId);
+        collection = mongoc_client_get_collection(handle->client, handle->database, handle->topics_coll);
+        cursor = mongoc_collection_find(collection,
+                                        MONGOC_QUERY_NONE,
+                                        0,
+                                        0,
+                                        0,
+                                        &query,
+                                        NULL,
+                                        NULL);
+
 
         if (!mongoc_cursor_error (cursor, &error) && 
             mongoc_cursor_next(cursor, &doc)) {
@@ -315,10 +319,11 @@ int be_mongo_aclcheck(void *conf, const char *clientid, const char *username, co
                     while (bson_iter_next(&iter)) {
 
                         char *str = bson_iter_dup_utf8(&iter, &len);
-
                         mosquitto_topic_matches_sub(str, topic, &check);
                         if (check) {
                                 match = 1;
+                                bson_free(str);
+                                break;                                
                         }
                         bson_free(str);
                     }
@@ -326,17 +331,16 @@ int be_mongo_aclcheck(void *conf, const char *clientid, const char *username, co
 
         }
 
+        if ( (mongoc_cursor_error (cursor, &error)) && (match != 1) ) {
+                fprintf (stderr, "Cursor Failure: %s\n", error.message);
+        }
+
+        bson_destroy(&query);
+        mongoc_cursor_destroy(cursor);
+        mongoc_collection_destroy(collection);
+
     }
 
-
-	
-	if ( (mongoc_cursor_error (cursor, &error)) && (match != 1) ) {
-			fprintf (stderr, "Cursor Failure: %s\n", error.message);
-	}
-	
-	bson_destroy(&query);
-	mongoc_cursor_destroy (cursor);
-	mongoc_collection_destroy(collection);
 	return match;
 
 }
