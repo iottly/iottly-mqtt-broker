@@ -30,12 +30,13 @@ RUN \
     libtool \
     openssl-dev \
     util-linux-dev \
+    git \
   && apk add --update --virtual .auth-plug-runtime-dependencies \
     c-ares-dev
 
 
 RUN \
-  LIBMONGOC_VERSION="1.3.1" \
+  LIBMONGOC_VERSION="1.5.1" \
     && LIBMONGOC_FILENAME="mongo-c-driver-${LIBMONGOC_VERSION}" \
     && LIBMONGOC_SOURCE="https://github.com/mongodb/mongo-c-driver/releases/download/${LIBMONGOC_VERSION}/${LIBMONGOC_FILENAME}.tar.gz" \
     && curl -fSL --connect-timeout 30 ${LIBMONGOC_SOURCE} | tar xz -C /tmp \
@@ -54,16 +55,15 @@ RUN  \
     && make WITH_SRV=no binary
 
 
-ENV AUTHPLUG_VERSION 0.0.9
-ENV AUTHPLUG_FILENAME mosquitto-auth-plug-$AUTHPLUG_VERSION
+ENV AUTHPLUG_FILENAME mosquitto-auth-plug
+ENV REGIT 2
 
-RUN  \
-  AUTHPLUG_SOURCE="https://github.com/jpmens/mosquitto-auth-plug/archive/${AUTHPLUG_VERSION}.tar.gz" \
-    && curl -fSL --connect-timeout 30 ${AUTHPLUG_SOURCE} | tar xz -C /tmp 
+RUN \
+  cd /tmp \
+  && git clone https://github.com/iottly/${AUTHPLUG_FILENAME}.git
 
 ADD mosquitto-auth-plug/config.mk /tmp/$AUTHPLUG_FILENAME/config.mk
 ADD mosquitto-auth-plug/cache.h /tmp/$AUTHPLUG_FILENAME/cache.h
-ADD mosquitto-auth-plug/be-mongo.c /tmp/$AUTHPLUG_FILENAME/be-mongo.c
 
 RUN \
   cd /tmp/${AUTHPLUG_FILENAME} \
