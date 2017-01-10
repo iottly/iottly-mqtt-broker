@@ -17,7 +17,7 @@
 FROM eclipse-mosquitto
 MAINTAINER iottly
 
-
+RUN apk update
 RUN apk add mosquitto-clients
 
 
