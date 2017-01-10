@@ -14,7 +14,7 @@
 # limitations under the License.
 # 
 
-FROM eclipse-mosquitto
+FROM eclipse-mosquitto:1.4.8
 MAINTAINER iottly
 
 
