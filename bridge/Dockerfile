@@ -17,8 +17,10 @@
 FROM eclipse-mosquitto:1.4.8
 MAINTAINER iottly
 
+RUN apk add --update bash
+
 RUN mkdir /mosquitto/bridge-config
 
 ADD /mosquitto/config /mosquitto/config
 
-#ADD docker-entrypoint.sh docker-entrypoint.sh
+ADD docker-entrypoint.sh docker-entrypoint.sh
