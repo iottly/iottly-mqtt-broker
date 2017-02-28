@@ -22,7 +22,7 @@ if [ -n "$BRIDGECONF" ] && [ -n "$NODELIST" ]; then
 
 				connection mosq-node-0$nodeindex
 				address $element
-				topic /iottly/+/+/commands out
+				topic $IOTTLY_MQTT_TOPIC_COMMANDS out
 				try_private true
 				remote_username $BRIDGE_REMOTE_USERNAME
 				remote_password $BRIDGE_REMOTE_PASSWORD
