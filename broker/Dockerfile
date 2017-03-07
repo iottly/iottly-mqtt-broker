@@ -14,7 +14,8 @@
 # limitations under the License.
 # 
 
-FROM eclipse-mosquitto:1.4.8
+#FROM eclipse-mosquitto:1.4.8
+FROM alpine:3.4
 MAINTAINER iottly
 
 
@@ -48,11 +49,13 @@ RUN \
 
 RUN  \
   MOSQUITTO_VERSION="1.4.8" \
-    && MOSQUITTO_FILENAME="mosquitto-${MOSQUITTO_VERSION}" \
-    && MOSQUITTO_SOURCE="https://github.com/eclipse/mosquitto/archive/v${MOSQUITTO_VERSION}.tar.gz" \
-    && curl -fSL --connect-timeout 30 ${MOSQUITTO_SOURCE} | tar xz -C /tmp \
+    && MOSQUITTO_FILENAME="mosquitto" \
+    && cd /tmp \
+    && git clone https://github.com/iottly/mosquitto.git \    
     && cd /tmp/${MOSQUITTO_FILENAME} \
-    && make WITH_SRV=no binary
+    && make WITH_SRV=no \
+    && find . -type f | grep Makefile | xargs grep -r -- --strip-program  | awk {'print $1'} | cut -d : -f 1 | xargs sed -i 's/--strip-program=\${CROSS_COMPILE}\${STRIP}//g' \
+    && make WITH_SRV=no install
 
 
 ENV AUTHPLUG_FILENAME mosquitto-auth-plug
