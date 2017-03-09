@@ -33,8 +33,8 @@ RUN \
     util-linux-dev \
     git \
   && apk add --update --virtual .auth-plug-runtime-dependencies \
-    c-ares-dev
-
+    c-ares-dev \
+    libuuid
 
 RUN \
   LIBMONGOC_VERSION="1.5.1" \
@@ -53,9 +53,11 @@ RUN  \
     && cd /tmp \
     && git clone https://github.com/iottly/mosquitto.git \    
     && cd /tmp/${MOSQUITTO_FILENAME} \
-    && make WITH_SRV=no \
+    && make \
     && find . -type f | grep Makefile | xargs grep -r -- --strip-program  | awk {'print $1'} | cut -d : -f 1 | xargs sed -i 's/--strip-program=\${CROSS_COMPILE}\${STRIP}//g' \
-    && make WITH_SRV=no install
+    && make install \
+    && adduser -s /bin/false -D -H mosquitto
+
 
 
 ENV AUTHPLUG_FILENAME mosquitto-auth-plug
@@ -82,4 +84,6 @@ RUN \
 
 ADD /mosquitto/config /mosquitto/config
 
+RUN chown -R mosquitto:mosquitto /mosquitto
 
+CMD ["/usr/local/sbin/mosquitto", "-c", "/mosquitto/config/mosquitto.conf"]
